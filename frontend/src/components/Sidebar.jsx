@@ -7,6 +7,8 @@ export default function Sidebar({
   onToggleCollapse,
   isMobileOpen = false,
   onCloseMobile,
+  currentUser,
+  onLogout,
 }) {
   const navItems = [
     {
@@ -129,6 +131,37 @@ export default function Sidebar({
             );
           })}
         </nav>
+
+        {/* Sidebar Footer: User info & logout */}
+        <div className="sidebar-footer">
+          {!collapsed ? (
+            <div className="sidebar-user-info">
+              <span className="sidebar-user-email">{currentUser?.email || 'User'}</span>
+              <button
+                type="button"
+                className="btn-sidebar-logout"
+                onClick={onLogout}
+                aria-label="Sign out"
+              >
+                Sign out
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="btn-sidebar-logout-icon"
+              onClick={onLogout}
+              aria-label="Sign out"
+              title="Sign out"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            </button>
+          )}
+        </div>
       </aside>
     </>
   );

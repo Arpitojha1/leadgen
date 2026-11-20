@@ -97,7 +97,9 @@ All error responses strictly adhere to the shape:
 | `GET` | `/api/auth/me` | Yes | Get currently authenticated user profile | `200`, `401` |
 | `GET` | `/api/leads` | Yes | List, search, filter, paginate, and sort user's leads | `200`, `400`, `401`, `500` |
 | `POST` | `/api/leads` | Yes | Create a new lead for current user | `201`, `400`, `401`, `409`, `500` |
-| `GET` | `/api/leads/stats` | Yes | Get lead counts aggregated by status (`GROUP BY`) | `200`, `401`, `500` |
+| `GET` | `/api/leads/stats` | Yes | Get lead counts and pipeline values aggregated by status and source | `200`, `401`, `500` |
+| `GET` | `/api/leads/activity` | Yes | Retrieve recent activity events for current user | `200`, `401`, `500` |
+| `POST` | `/api/leads/demo-reset` | Yes | Re-seed 10 canonical reference leads and activity history | `200`, `401`, `500` |
 | `GET` | `/api/leads/:id` | Yes | Fetch single lead by ID (enforces user isolation) | `200`, `401`, `404`, `500` |
 | `PUT` | `/api/leads/:id` | Yes | Update lead details or status (enforces user isolation) | `200`, `400`, `401`, `404`, `409`, `500` |
 | `DELETE` | `/api/leads/:id` | Yes | Permanently delete lead (enforces user isolation) | `204`, `401`, `404`, `500` |
@@ -124,15 +126,27 @@ CREATE TABLE IF NOT EXISTS leads (
   company TEXT NOT NULL,
   source TEXT NOT NULL CHECK(source IN ('Website', 'Referral', 'LinkedIn', 'Cold Call', 'Event', 'Other')),
   status TEXT NOT NULL CHECK(status IN ('New', 'Contacted', 'Qualified', 'Lost')),
+  deal_value NUMERIC DEFAULT 0 CHECK(deal_value >= 0),
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   UNIQUE(user_id, email)
 );
 
+CREATE TABLE IF NOT EXISTS activity_logs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  lead_id INTEGER,
+  message TEXT NOT NULL,
+  type TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 CREATE INDEX IF NOT EXISTS idx_leads_user_status ON leads (user_id, status);
 CREATE INDEX IF NOT EXISTS idx_leads_user_name ON leads (user_id, name);
 CREATE INDEX IF NOT EXISTS idx_leads_user_created ON leads (user_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_activity_user_created ON activity_logs (user_id, created_at);
 ```
 
 ---

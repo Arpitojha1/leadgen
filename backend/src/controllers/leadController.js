@@ -73,6 +73,7 @@ function listLeads(req, res, next) {
     const query = req.validatedQuery || req.query;
     const search = (query.search || '').trim();
     const status = (query.status || '').trim();
+    const source = (query.source || '').trim();
     const page = Math.max(1, parseInt(query.page, 10) || 1);
     const limit = Math.max(1, Math.min(100, parseInt(query.limit, 10) || 10));
     const sortBy = query.sortBy;
@@ -90,6 +91,11 @@ function listLeads(req, res, next) {
     if (status !== '') {
       conditions.push('leads.status = ?');
       params.push(status);
+    }
+
+    if (source !== '') {
+      conditions.push('leads.source = ?');
+      params.push(source);
     }
 
     const whereClause = conditions.join(' AND ');
@@ -362,23 +368,28 @@ function resetDemoData(req, res, next) {
       db.prepare('DELETE FROM activity_logs WHERE user_id = ?').run(userId);
 
       const insertLead = db.prepare(`
-        INSERT INTO leads (user_id, name, email, phone, company, source, status, deal_value)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO leads (user_id, name, email, phone, company, source, status, deal_value, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now', ?))
       `);
 
-      for (const lead of CANONICAL_DEMO_LEADS) {
-        insertLead.run(userId, lead.name, lead.email, lead.phone, lead.company, lead.source, lead.status, lead.deal_value);
+      // Insert in reverse order with incremented timestamps so newest/DESC query has Alice Chen first
+      const count = CANONICAL_DEMO_LEADS.length;
+      for (let i = 0; i < count; i++) {
+        const lead = CANONICAL_DEMO_LEADS[i];
+        // Alice Chen gets highest timestamp (+10 seconds), Noah Singh gets (+1 second)
+        const offsetSec = `+${count - i} seconds`;
+        insertLead.run(userId, lead.name, lead.email, lead.phone, lead.company, lead.source, lead.status, lead.deal_value, offsetSec);
       }
 
       const insertActivity = db.prepare(`
-        INSERT INTO activity_logs (user_id, message, type)
-        VALUES (?, ?, ?)
+        INSERT INTO activity_logs (user_id, message, type, created_at)
+        VALUES (?, ?, ?, datetime('now', ?))
       `);
 
-      // 3 items matching ref-3 in order (oldest to newest)
-      insertActivity.run(userId, 'A new Website lead requested a demo for a $12,000 opportunity.', 'demo_seeded');
-      insertActivity.run(userId, 'Marcus Johnson from GreenLeaf Organics was added as a Referral lead.', 'created');
-      insertActivity.run(userId, 'Alice Chen from TechFlow Solutions was moved to Contacted.', 'status_changed');
+      // 3 items matching ref-3 in order (item 1 newest, item 3 oldest)
+      insertActivity.run(userId, 'Alice Chen from TechFlow Solutions was moved to Contacted.', 'status_changed', '+3 seconds');
+      insertActivity.run(userId, 'Marcus Johnson from GreenLeaf Organics was added as a Referral lead.', 'created', '+2 seconds');
+      insertActivity.run(userId, 'A new Website lead requested a demo for a $12,000 opportunity.', 'demo_seeded', '+1 seconds');
     });
 
     resetTx();

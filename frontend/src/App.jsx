@@ -298,6 +298,8 @@ export default function App() {
         onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}
         isMobileOpen={isMobileDrawerOpen}
         onCloseMobile={() => setIsMobileDrawerOpen(false)}
+        currentUser={currentUser}
+        onLogout={handleLogout}
       />
 
       {/* Main Page Area */}
@@ -330,7 +332,7 @@ export default function App() {
           </button>
         </header>
 
-        {/* Global Error Banner */}
+        {/* Content Container */}
         <div className="crm-content-container">
           <ErrorBanner
             error={globalError}
@@ -341,23 +343,6 @@ export default function App() {
             }}
             onDismiss={() => setGlobalError(null)}
           />
-
-          {/* Desktop Top Strip (User email and sign out) */}
-          <div className="desktop-user-strip">
-            {currentUser?.email && (
-              <span className="user-email-text" title={`Signed in as ${currentUser.email}`}>
-                Signed in as <strong>{currentUser.email}</strong>
-              </span>
-            )}
-            <button
-              type="button"
-              className="btn-signout"
-              onClick={handleLogout}
-              aria-label="Sign out"
-            >
-              Sign out
-            </button>
-          </div>
 
           {/* View Routing */}
           {activeView === 'overview' && (

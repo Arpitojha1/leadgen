@@ -62,8 +62,8 @@ export default function ChartsGrid({ stats = {} }) {
                   data={chartDonutData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={46}
-                  outerRadius={70}
+                  innerRadius={38}
+                  outerRadius={72}
                   paddingAngle={2}
                   dataKey="value"
                   stroke="#FFFFFF"
@@ -116,10 +116,12 @@ export default function ChartsGrid({ stats = {} }) {
                   tickLine={false}
                 />
                 <YAxis
+                  ticks={[0, 30000, 60000]}
+                  domain={[0, 65000]}
                   tick={{ fontSize: 11, fill: '#64748B' }}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={(v) => (v === 0 ? '0' : v >= 1000 ? `${v}` : v)}
+                  tickFormatter={(v) => (v === 0 ? '0' : v)}
                 />
                 <BarTooltip
                   formatter={(val) => [formatCurrency(val), 'Pipeline Value']}
