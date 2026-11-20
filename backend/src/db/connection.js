@@ -24,8 +24,8 @@ function initDb(dbPath = config.dbPath) {
   // Enforce foreign key constraints
   dbInstance.pragma('foreign_keys = ON');
 
-  // Enable WAL mode for high concurrency if not in memory
-  if (dbPath !== ':memory:') {
+  // Enable WAL mode for high concurrency if not in memory and not in serverless (Vercel)
+  if (dbPath !== ':memory:' && !process.env.VERCEL) {
     dbInstance.pragma('journal_mode = WAL');
   }
 
@@ -41,6 +41,27 @@ function initDb(dbPath = config.dbPath) {
     }
   } catch {
     // Ignore migration errors if fresh table
+  }
+
+  // Auto-seed initial demo user and 10 canonical leads if database is empty
+  try {
+    const userCount = dbInstance.prepare("SELECT COUNT(*) as count FROM users").get();
+    if (userCount && userCount.count === 0) {
+      const bcrypt = require('bcryptjs');
+      const hash = bcrypt.hashSync('Password123', 10);
+      const userRes = dbInstance
+        .prepare("INSERT INTO users (email, password_hash) VALUES (?, ?)")
+        .run('demo@leadmanager.com', hash);
+      const userId = userRes.lastInsertRowid;
+
+      // Seed 10 canonical leads
+      const { resetDemoDataDirect } = require('../controllers/leadController');
+      if (typeof resetDemoDataDirect === 'function') {
+        resetDemoDataDirect(dbInstance, userId);
+      }
+    }
+  } catch {
+    // Non-fatal if seeding fails
   }
 
   return dbInstance;

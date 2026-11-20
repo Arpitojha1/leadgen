@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/src/serverless.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/src/serverless.js"
+    }
+  ]
+}
