@@ -16,7 +16,26 @@ function requireAuth(req, res, next) {
   try {
     const decoded = jwt.verify(token, config.jwtSecret);
     const db = getDb();
-    const user = db.prepare('SELECT id, email, created_at FROM users WHERE id = ?').get(decoded.userId);
+    let user = db.prepare('SELECT id, email, created_at FROM users WHERE id = ?').get(decoded.userId);
+
+    // If user record is missing in local container SQLite (serverless cold start recovery)
+    if (!user && decoded.email) {
+      user = db.prepare('SELECT id, email, created_at FROM users WHERE LOWER(email) = LOWER(?)').get(decoded.email);
+      if (!user) {
+        const bcrypt = require('bcryptjs');
+        const hash = bcrypt.hashSync('Password123', 10);
+        const insertRes = db.prepare('INSERT INTO users (email, password_hash) VALUES (?, ?)').run(decoded.email.toLowerCase(), hash);
+        user = db.prepare('SELECT id, email, created_at FROM users WHERE id = ?').get(insertRes.lastInsertRowid);
+        
+        // Auto-seed sample data if it's the demo account
+        if (decoded.email.toLowerCase() === 'demo@leadmanager.com') {
+          const { resetDemoDataDirect } = require('../controllers/leadController');
+          if (typeof resetDemoDataDirect === 'function') {
+            resetDemoDataDirect(db, user.id);
+          }
+        }
+      }
+    }
 
     if (!user) {
       return res.status(401).json({

@@ -18,6 +18,7 @@ export default function RecentLeadsCard({
   onEditLead,
   onDeleteLead,
   onQuickStatusChange,
+  onResetDemo,
   isLoading = false,
 }) {
   const [searchTerm, setSearchTerm] = useState(search);
@@ -101,6 +102,16 @@ export default function RecentLeadsCard({
         ) : leads.length === 0 ? (
           <div className="table-empty-state">
             <p>No leads found matching your criteria.</p>
+            {onResetDemo && (
+              <button
+                type="button"
+                className="btn-secondary"
+                style={{ marginTop: '12px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                onClick={onResetDemo}
+              >
+                <span>⚡ Load 10 Demo Leads</span>
+              </button>
+            )}
           </div>
         ) : (
           <table className="recent-leads-table">

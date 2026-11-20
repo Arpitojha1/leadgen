@@ -43,12 +43,13 @@ function initDb(dbPath = config.dbPath) {
     // Ignore migration errors if fresh table
   }
 
-  // Auto-seed initial demo user and 10 canonical leads if database is empty
+  // Auto-seed initial demo user and 10 canonical leads if missing
   try {
-    const userCount = dbInstance.prepare("SELECT COUNT(*) as count FROM users").get();
-    if (userCount && userCount.count === 0) {
-      const bcrypt = require('bcryptjs');
-      const hash = bcrypt.hashSync('Password123', 10);
+    let demoUser = dbInstance.prepare("SELECT id FROM users WHERE LOWER(email) = 'demo@leadmanager.com'").get();
+    const bcrypt = require('bcryptjs');
+    const hash = bcrypt.hashSync('Password123', 10);
+
+    if (!demoUser) {
       const userRes = dbInstance
         .prepare("INSERT INTO users (email, password_hash) VALUES (?, ?)")
         .run('demo@leadmanager.com', hash);
@@ -59,9 +60,18 @@ function initDb(dbPath = config.dbPath) {
       if (typeof resetDemoDataDirect === 'function') {
         resetDemoDataDirect(dbInstance, userId);
       }
+    } else {
+      // Ensure the demo user has the 10 reference leads
+      const leadCount = dbInstance.prepare("SELECT COUNT(*) as count FROM leads WHERE user_id = ?").get(demoUser.id);
+      if (leadCount && leadCount.count === 0) {
+        const { resetDemoDataDirect } = require('../controllers/leadController');
+        if (typeof resetDemoDataDirect === 'function') {
+          resetDemoDataDirect(dbInstance, demoUser.id);
+        }
+      }
     }
-  } catch {
-    // Non-fatal if seeding fails
+  } catch (err) {
+    console.error('Demo user check/seed error:', err);
   }
 
   return dbInstance;

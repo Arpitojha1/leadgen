@@ -374,6 +374,7 @@ export default function App() {
                 onEditLead={handleOpenEditModal}
                 onDeleteLead={handleOpenDeleteModal}
                 onQuickStatusChange={handleQuickStatusChange}
+                onResetDemo={() => setIsResetDemoModalOpen(true)}
                 isLoading={isLoading}
               />
 
@@ -421,6 +422,7 @@ export default function App() {
                 onEditLead={handleOpenEditModal}
                 onDeleteLead={handleOpenDeleteModal}
                 onQuickStatusChange={handleQuickStatusChange}
+                onResetDemo={() => setIsResetDemoModalOpen(true)}
                 isLoading={isLoading}
               />
             </>
