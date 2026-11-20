@@ -6,6 +6,8 @@ const {
   updateLead,
   deleteLead,
   getStats,
+  getActivity,
+  resetDemoData,
 } = require('../controllers/leadController');
 const { requireAuth } = require('../middleware/auth');
 const { validateBody, validateQuery } = require('../middleware/validate');
@@ -20,8 +22,10 @@ const router = express.Router();
 // All lead endpoints require authentication
 router.use(requireAuth);
 
-// Leads stats endpoint (placed before /:id)
+// Leads stats and auxiliary endpoints (placed before /:id)
 router.get('/stats', getStats);
+router.get('/activity', getActivity);
+router.post('/demo-reset', resetDemoData);
 
 // Lead collection endpoints
 router.post('/', validateBody(createLeadSchema), createLead);

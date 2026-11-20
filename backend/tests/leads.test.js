@@ -424,4 +424,34 @@ describe('Leads API Endpoints', () => {
       });
     });
   });
+
+  describe('Demo Reset and Activity Feed API', () => {
+    it('POST /api/leads/demo-reset seeds 10 canonical leads and activity logs with matching stats', async () => {
+      const resetRes = await request(app)
+        .post('/api/leads/demo-reset')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(resetRes.status).toBe(200);
+      expect(resetRes.body.count).toBe(10);
+
+      const statsRes = await request(app)
+        .get('/api/leads/stats')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(statsRes.status).toBe(200);
+      expect(statsRes.body.total).toBe(10);
+      expect(statsRes.body.byStatus.Contacted).toBe(3);
+      expect(statsRes.body.qualifiedValue).toBe(56000);
+      expect(statsRes.body.pipelineValue).toBe(148500);
+      expect(Array.isArray(statsRes.body.bySource)).toBe(true);
+
+      const actRes = await request(app)
+        .get('/api/leads/activity')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(actRes.status).toBe(200);
+      expect(Array.isArray(actRes.body.data)).toBe(true);
+      expect(actRes.body.data.length).toBeGreaterThanOrEqual(3);
+    });
+  });
 });
