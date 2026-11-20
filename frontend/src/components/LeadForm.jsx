@@ -19,6 +19,7 @@ export default function LeadForm({
     company: '',
     source: 'Website',
     status: 'New',
+    deal_value: '',
   });
 
   const [clientErrors, setClientErrors] = useState({});
@@ -33,6 +34,7 @@ export default function LeadForm({
         company: initialData.company || '',
         source: initialData.source || 'Website',
         status: initialData.status || 'New',
+        deal_value: initialData.deal_value !== undefined && initialData.deal_value !== null ? initialData.deal_value : '',
       });
     } else {
       setFormData({
@@ -42,6 +44,7 @@ export default function LeadForm({
         company: '',
         source: 'Website',
         status: 'New',
+        deal_value: '',
       });
     }
     setClientErrors({});
@@ -93,6 +96,7 @@ export default function LeadForm({
       company: true,
       source: true,
       status: true,
+      deal_value: true,
     });
 
     const validation = validateLeadForm(formData);
@@ -102,7 +106,12 @@ export default function LeadForm({
       return;
     }
 
-    await onSubmit(formData);
+    const payload = {
+      ...formData,
+      deal_value: formData.deal_value === '' ? 0 : Number(formData.deal_value),
+    };
+
+    await onSubmit(payload);
   }
 
   // Combined error display (client validation prioritized, then backend field error)
@@ -265,6 +274,29 @@ export default function LeadForm({
                 </select>
                 {getFieldError('status') && (
                   <span className="field-error-text">{getFieldError('status')}</span>
+                )}
+              </div>
+
+              {/* Deal Value field (optional numeric >= 0) */}
+              <div className="form-group form-group-full">
+                <label className="form-label" htmlFor="lead-deal-value">
+                  Deal Value ($) <span style={{ color: 'var(--color-text-muted)', fontWeight: 400 }}>(optional)</span>
+                </label>
+                <input
+                  id="lead-deal-value"
+                  name="deal_value"
+                  type="number"
+                  min="0"
+                  step="any"
+                  className={`form-input ${getFieldError('deal_value') ? 'form-input-error' : ''}`}
+                  placeholder="e.g. 15000"
+                  value={formData.deal_value}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  disabled={isSubmitting}
+                />
+                {getFieldError('deal_value') && (
+                  <span className="field-error-text">{getFieldError('deal_value')}</span>
                 )}
               </div>
             </div>

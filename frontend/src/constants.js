@@ -16,28 +16,28 @@ export const STATUSES = [
 
 export const STATUS_COLORS = {
   New: {
-    bg: '#eff6ff',
-    text: '#1d4ed8',
-    border: '#bfdbfe',
-    dot: '#3b82f6',
+    bg: '#E8F4F8',
+    text: '#2A677B',
+    border: '#8BBFD0',
+    dot: '#8BBFD0',
   },
   Contacted: {
-    bg: '#fefce8',
-    text: '#a16207',
-    border: '#fef08a',
-    dot: '#eab308',
+    bg: '#EEF3EA',
+    text: '#475E32',
+    border: '#A3B98A',
+    dot: '#A3B98A',
   },
   Qualified: {
-    bg: '#f0fdf4',
-    text: '#15803d',
-    border: '#bbf7d0',
-    dot: '#22c55e',
+    bg: '#DCFCE7',
+    text: '#15803D',
+    border: '#22C55E',
+    dot: '#22C55E',
   },
   Lost: {
-    bg: '#fef2f2',
-    text: '#b91c1c',
-    border: '#fecaca',
-    dot: '#ef4444',
+    bg: '#FFEDD5',
+    text: '#C2410C',
+    border: '#F97316',
+    dot: '#F97316',
   },
 };
 
@@ -65,7 +65,7 @@ export function validateLeadForm(values) {
   const phone = (values.phone || '').trim();
   if (!phone) {
     errors.phone = 'Phone number is required';
-  } else if (!/^[\d\s+\-]+$/.test(phone)) {
+  } else if (!/^[\d\s+-]+$/.test(phone)) {
     errors.phone = 'Phone may only contain digits, spaces, +, and -';
   } else {
     const digits = phone.replace(/\D/g, '');
@@ -90,6 +90,14 @@ export function validateLeadForm(values) {
   // Status validation
   if (!values.status || !STATUSES.includes(values.status)) {
     errors.status = `Status must be one of: ${STATUSES.join(', ')}`;
+  }
+
+  // Deal value validation (optional numeric >= 0)
+  if (values.deal_value !== undefined && values.deal_value !== '' && values.deal_value !== null) {
+    const val = Number(values.deal_value);
+    if (isNaN(val) || val < 0) {
+      errors.deal_value = 'Deal value must be a positive number or zero';
+    }
   }
 
   return {

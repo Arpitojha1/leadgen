@@ -40,7 +40,7 @@ async function request(endpoint, options = {}) {
       ...options,
       headers,
     });
-  } catch (netErr) {
+  } catch {
     // Network error or backend offline
     const error = new Error('Unable to connect to the server. Please check your internet connection or verify the backend is running.');
     error.status = 0;
@@ -115,6 +115,7 @@ export const api = {
       const searchParams = new URLSearchParams();
       if (params.search) searchParams.set('search', params.search);
       if (params.status) searchParams.set('status', params.status);
+      if (params.source) searchParams.set('source', params.source);
       if (params.page) searchParams.set('page', params.page);
       if (params.limit) searchParams.set('limit', params.limit);
       if (params.sortBy) searchParams.set('sortBy', params.sortBy);
@@ -146,6 +147,14 @@ export const api = {
     },
     getStats: async () => {
       return request('/leads/stats');
+    },
+    getActivity: async () => {
+      return request('/leads/activity');
+    },
+    resetDemoData: async () => {
+      return request('/leads/demo-reset', {
+        method: 'POST',
+      });
     },
   },
 };
