@@ -151,6 +151,21 @@ CREATE INDEX IF NOT EXISTS idx_activity_user_created ON activity_logs (user_id, 
 
 ---
 
+## Deployment (Vercel Services)
+
+This repository is configured for **Vercel Services** multi-service deployment via [vercel.json](vercel.json):
+- **`services.backend`**: Express Node.js API with SQLite (`backend/`).
+- **`services.frontend`**: Vite React SPA (`frontend/`).
+- **Routing**: `/api/(.*)` routes to `backend`, while `/(.*)` routes to `frontend`.
+
+To deploy:
+1. Import repository at [vercel.com/new](https://vercel.com/new).
+2. Leave root directory as `./`.
+3. Set optional environment variable `JWT_SECRET`.
+4. Deploy!
+
+---
+
 ## Assumptions
 1. **User Scoping**: A user account should never see, edit, or delete leads belonging to other users. Any attempt to access another user's lead returns HTTP `404 Not Found` (rather than `403 Forbidden`) to avoid leaking the existence of other records.
 2. **Email Uniqueness**: Lead emails are unique *per user* (`UNIQUE(user_id, email)`). Multiple distinct users can manage independent leads with the same contact email without collision.
