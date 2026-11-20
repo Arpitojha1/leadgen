@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import loginArt from '../assets/login-art.webp';
 
 export default function AuthForm({ onAuthSuccess }) {
   const [isSignup, setIsSignup] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -66,177 +69,190 @@ export default function AuthForm({ onAuthSuccess }) {
   }
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
-        {/* Brand header */}
-        <div className="auth-header">
-          <div className="auth-brand">
-            <div className="brand-icon">LM</div>
-            <div className="auth-brand-text">
-              <span className="brand-title">Lead Manager</span>
-              <span className="brand-badge">CRM DASHBOARD</span>
+    <div className="auth-page-ref5">
+      <div className="auth-card-ref5">
+        {/* Left Column: Form */}
+        <div className="auth-form-column">
+          <div className="auth-form-inner">
+            <div className="auth-header-ref5">
+              <h1 className="auth-title-ref5">
+                {isSignup ? 'Create an account' : 'Welcome back'}
+              </h1>
+              <p className="auth-subtitle-ref5">
+                {isSignup
+                  ? 'Welcome! Please enter your details to register.'
+                  : 'Welcome back! Please enter your details.'}
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} noValidate>
+              {serverError && (
+                <div className="form-general-error" role="alert" style={{ marginBottom: '16px' }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                  <span>{serverError}</span>
+                </div>
+              )}
+
+              {/* Email Input */}
+              <div className="form-group-ref5">
+                <label className="form-label-ref5" htmlFor="auth-email">
+                  Email
+                </label>
+                <input
+                  id="auth-email"
+                  type="email"
+                  className={`form-input-ref5 ${errors.email ? 'form-input-error' : ''}`}
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isSubmitting || isDemoLoading}
+                  autoComplete="email"
+                  autoFocus={!isSignup}
+                />
+                {errors.email && <span className="field-error-text">{errors.email}</span>}
+              </div>
+
+              {/* Password Input with show/hide toggle */}
+              <div className="form-group-ref5">
+                <label className="form-label-ref5" htmlFor="auth-password">
+                  Password
+                </label>
+                <div className="password-input-wrapper">
+                  <input
+                    id="auth-password"
+                    type={showPassword ? 'text' : 'password'}
+                    className={`form-input-ref5 ${errors.password ? 'form-input-error' : ''}`}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={isSubmitting || isDemoLoading}
+                    autoComplete={isSignup ? 'new-password' : 'current-password'}
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    tabIndex="-1"
+                  >
+                    {showPassword ? (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                        <line x1="1" y1="1" x2="23" y2="23" />
+                      </svg>
+                    ) : (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+                {errors.password && <span className="field-error-text">{errors.password}</span>}
+              </div>
+
+              {/* Options row (Remember me & Demo shortcut) */}
+              <div className="auth-options-row">
+                <label className="checkbox-label-ref5">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                  />
+                  <span>Remember for 30 days</span>
+                </label>
+                <button
+                  type="button"
+                  className="auth-link-shortcut"
+                  onClick={handleFillDemoCredentials}
+                >
+                  Use Demo
+                </button>
+              </div>
+
+              {/* Primary Submit */}
+              <button
+                type="submit"
+                className="btn-primary-ref5"
+                disabled={isSubmitting || isDemoLoading}
+              >
+                {isSubmitting
+                  ? isSignup
+                    ? 'Creating account...'
+                    : 'Signing in...'
+                  : isSignup
+                  ? 'Sign up'
+                  : 'Sign in'}
+              </button>
+
+              {/* Secondary Demo Button matching ref-5 outline button */}
+              <button
+                type="button"
+                className="btn-outline-ref5"
+                onClick={handleQuickDemoLogin}
+                disabled={isSubmitting || isDemoLoading}
+              >
+                {isDemoLoading ? (
+                  <span>Accessing Demo Dashboard...</span>
+                ) : (
+                  <>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0284C7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                    </svg>
+                    <span>Sign in with Demo Account</span>
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Bottom toggle */}
+            <div className="auth-footer-ref5">
+              {isSignup ? (
+                <span>
+                  Already have an account?{' '}
+                  <button
+                    type="button"
+                    className="auth-link-bold"
+                    onClick={() => {
+                      setIsSignup(false);
+                      setServerError(null);
+                      setErrors({});
+                    }}
+                  >
+                    Sign in
+                  </button>
+                </span>
+              ) : (
+                <span>
+                  Don't have an account?{' '}
+                  <button
+                    type="button"
+                    className="auth-link-bold"
+                    onClick={() => {
+                      setIsSignup(true);
+                      setServerError(null);
+                      setErrors({});
+                    }}
+                  >
+                    Sign up for free
+                  </button>
+                </span>
+              )}
             </div>
           </div>
-          <h1 className="auth-title">
-            {isSignup ? 'Create an account' : 'Welcome back'}
-          </h1>
-          <p className="auth-subtitle">
-            {isSignup
-              ? 'Start tracking and converting your sales pipeline'
-              : 'Sign in to access your dashboard and lead analytics'}
-          </p>
         </div>
 
-        {/* 1-Click Instant Demo Access Box */}
-        <div className="demo-callout">
-          <div className="demo-callout-header">
-            <span className="demo-callout-badge">⚡ INSTANT DEMO</span>
-            <span className="demo-callout-hint">Preloaded with 10 leads & charts</span>
-          </div>
-          <button
-            type="button"
-            className="btn-demo-quick"
-            onClick={handleQuickDemoLogin}
-            disabled={isDemoLoading || isSubmitting}
-            aria-label="One-click demo sign in"
-          >
-            {isDemoLoading ? (
-              <span>Logging in as Demo User...</span>
-            ) : (
-              <>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-                  <polyline points="10 17 15 12 10 7" />
-                  <line x1="15" y1="12" x2="3" y2="12" />
-                </svg>
-                <span>Login as Demo User (1-Click)</span>
-              </>
-            )}
-          </button>
-          <div className="demo-credentials-row">
-            <span>demo@leadmanager.com &bull; Password123</span>
-            <button
-              type="button"
-              className="btn-fill-creds"
-              onClick={handleFillDemoCredentials}
-            >
-              Fill fields
-            </button>
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div className="auth-divider">
-          <span>or continue with your credentials</span>
-        </div>
-
-        {/* Tab switch between Sign In and Sign Up */}
-        <div className="auth-tabs" role="tablist">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={!isSignup}
-            className={`auth-tab ${!isSignup ? 'auth-tab-active' : ''}`}
-            onClick={() => {
-              setIsSignup(false);
-              setServerError(null);
-              setErrors({});
-            }}
-          >
-            Sign In
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={isSignup}
-            className={`auth-tab ${isSignup ? 'auth-tab-active' : ''}`}
-            onClick={() => {
-              setIsSignup(true);
-              setServerError(null);
-              setErrors({});
-            }}
-          >
-            Create Account
-          </button>
-        </div>
-
-        {/* Login / Signup Form */}
-        <form onSubmit={handleSubmit} noValidate>
-          {serverError && (
-            <div className="form-general-error" role="alert">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
-              <span>{serverError}</span>
-            </div>
-          )}
-
-          <div className="form-group" style={{ marginBottom: '1.1rem' }}>
-            <label className="form-label form-label-required" htmlFor="auth-email">
-              Email Address
-            </label>
-            <input
-              id="auth-email"
-              type="email"
-              className={`form-input ${errors.email ? 'form-input-error' : ''}`}
-              placeholder="name@company.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={isSubmitting || isDemoLoading}
-              autoComplete="email"
-              autoFocus={!isSignup}
-            />
-            {errors.email && <span className="field-error-text">{errors.email}</span>}
-          </div>
-
-          <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-            <label className="form-label form-label-required" htmlFor="auth-password">
-              Password
-            </label>
-            <input
-              id="auth-password"
-              type="password"
-              className={`form-input ${errors.password ? 'form-input-error' : ''}`}
-              placeholder="At least 6 characters"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={isSubmitting || isDemoLoading}
-              autoComplete={isSignup ? 'new-password' : 'current-password'}
-            />
-            {errors.password && <span className="field-error-text">{errors.password}</span>}
-          </div>
-
-          <button
-            type="submit"
-            className="btn-primary auth-submit-btn"
-            disabled={isSubmitting || isDemoLoading}
-          >
-            {isSubmitting
-              ? isSignup
-                ? 'Creating Account...'
-                : 'Signing In...'
-              : isSignup
-              ? 'Create Account'
-              : 'Sign In to Dashboard'}
-          </button>
-        </form>
-
-        {/* Footer switch */}
-        <div className="auth-footer-text">
-          {isSignup ? 'Already have an account?' : "Don't have an account yet?"}{' '}
-          <button
-            type="button"
-            className="auth-link-btn"
-            onClick={() => {
-              setIsSignup(!isSignup);
-              setServerError(null);
-              setErrors({});
-            }}
-          >
-            {isSignup ? 'Sign In' : 'Sign Up for free'}
-          </button>
+        {/* Right Column: Visual Art (ref-5) */}
+        <div className="auth-art-column">
+          <img
+            src={loginArt}
+            alt="Lead Manager Visual Art"
+            className="auth-art-image"
+          />
         </div>
       </div>
     </div>
