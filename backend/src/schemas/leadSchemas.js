@@ -42,6 +42,11 @@ const createLeadSchema = z.object({
       message: `Status must be one of: ${STATUSES.join(', ')}`,
     }),
   }),
+  deal_value: z.coerce
+    .number({ invalid_type_error: 'Deal value must be a number' })
+    .min(0, 'Deal value must be greater than or equal to 0')
+    .optional()
+    .default(0),
 });
 
 // For update, allow partial or full payload, but at least one field or full lead
@@ -60,6 +65,7 @@ const ALLOWED_SORT_COLUMNS = [
   'company',
   'source',
   'status',
+  'deal_value',
   'created_at',
   'updated_at',
 ];

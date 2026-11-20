@@ -18,15 +18,27 @@ const schemaSQL = `
     company TEXT NOT NULL,
     source TEXT NOT NULL CHECK(source IN ('Website', 'Referral', 'LinkedIn', 'Cold Call', 'Event', 'Other')),
     status TEXT NOT NULL CHECK(status IN ('New', 'Contacted', 'Qualified', 'Lost')),
+    deal_value NUMERIC DEFAULT 0 CHECK(deal_value >= 0),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE(user_id, email)
   );
 
+  CREATE TABLE IF NOT EXISTS activity_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    lead_id INTEGER,
+    message TEXT NOT NULL,
+    type TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+
   CREATE INDEX IF NOT EXISTS idx_leads_user_status ON leads (user_id, status);
   CREATE INDEX IF NOT EXISTS idx_leads_user_name ON leads (user_id, name);
   CREATE INDEX IF NOT EXISTS idx_leads_user_created ON leads (user_id, created_at);
+  CREATE INDEX IF NOT EXISTS idx_activity_user_created ON activity_logs (user_id, created_at);
 `;
 
 module.exports = {

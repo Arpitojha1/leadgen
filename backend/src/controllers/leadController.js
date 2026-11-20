@@ -6,7 +6,7 @@ const { STATUSES } = require('../db/schema');
 function createLead(req, res, next) {
   try {
     const userId = req.user.id;
-    const { name, email, phone, company, source, status } = req.body;
+    const { name, email, phone, company, source, status, deal_value = 0 } = req.body;
     const db = getDb();
 
     // Check duplicate email for this user
@@ -23,11 +23,11 @@ function createLead(req, res, next) {
     }
 
     const stmt = db.prepare(`
-      INSERT INTO leads (user_id, name, email, phone, company, source, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO leads (user_id, name, email, phone, company, source, status, deal_value)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
-    const result = stmt.run(userId, name, email, phone, company, source, status);
+    const result = stmt.run(userId, name, email, phone, company, source, status, deal_value || 0);
 
     const newLead = db
       .prepare('SELECT * FROM leads WHERE id = ? AND user_id = ?')
@@ -80,7 +80,7 @@ function listLeads(req, res, next) {
     const offset = (page - 1) * limit;
 
     const selectQuery = `
-      SELECT id, user_id, name, email, phone, company, source, status, created_at, updated_at
+      SELECT id, user_id, name, email, phone, company, source, status, deal_value, created_at, updated_at
       FROM leads
       WHERE ${whereClause}
       ORDER BY ${sortColumn} ${sortDirection}
@@ -167,7 +167,7 @@ function updateLead(req, res, next) {
     const fieldsToUpdate = [];
     const updateParams = [];
 
-    const allowedFields = ['name', 'email', 'phone', 'company', 'source', 'status'];
+    const allowedFields = ['name', 'email', 'phone', 'company', 'source', 'status', 'deal_value'];
     for (const field of allowedFields) {
       if (req.body[field] !== undefined) {
         fieldsToUpdate.push(`${field} = ?`);

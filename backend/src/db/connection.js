@@ -32,6 +32,17 @@ function initDb(dbPath = config.dbPath) {
   // Run schema creation
   dbInstance.exec(schemaSQL);
 
+  // Safe migration for deal_value if leads table already existed without it
+  try {
+    const columns = dbInstance.prepare("PRAGMA table_info(leads)").all();
+    const hasDealValue = columns.some((c) => c.name === 'deal_value');
+    if (!hasDealValue) {
+      dbInstance.exec("ALTER TABLE leads ADD COLUMN deal_value NUMERIC DEFAULT 0 CHECK(deal_value >= 0)");
+    }
+  } catch {
+    // Ignore migration errors if fresh table
+  }
+
   return dbInstance;
 }
 

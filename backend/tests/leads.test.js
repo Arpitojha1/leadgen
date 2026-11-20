@@ -49,6 +49,39 @@ describe('Leads API Endpoints', () => {
       expect(res.body.data.source).toBe('Website');
     });
 
+    it('should create a lead with valid deal_value and reject negative deal_value', async () => {
+      const validRes = await request(app)
+        .post('/api/leads')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          name: 'Deal Lead',
+          email: 'deal@cyberdyne.com',
+          phone: '+1 555-0199',
+          company: 'Cyberdyne Systems',
+          source: 'Website',
+          status: 'New',
+          deal_value: 12500,
+        });
+
+      expect(validRes.status).toBe(201);
+      expect(validRes.body.data.deal_value).toBe(12500);
+
+      const invalidRes = await request(app)
+        .post('/api/leads')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          name: 'Negative Deal',
+          email: 'neg@cyberdyne.com',
+          phone: '+1 555-0199',
+          company: 'Cyberdyne Systems',
+          source: 'Website',
+          status: 'New',
+          deal_value: -500,
+        });
+
+      expect(invalidRes.status).toBe(400);
+    });
+
     it('should accept valid international and formatted phone numbers (7-15 digits)', async () => {
       const phones = [
         '+44 20 7946 0991',
